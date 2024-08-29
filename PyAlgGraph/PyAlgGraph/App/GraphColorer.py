@@ -54,6 +54,31 @@ class GraphColorer:
         self.execution_time = end_time - start_time
         print("Execution time: ", self.execution_time, " seconds")
         return edge_colors
+    
+    def bipartite_coloring(self, graph: nx.Graph):
+        start_time = time.time()
+        left_nodes = {n for n, d in graph.nodes(data=True) if d['bipartite'] == 0}
+        right_nodes = set(graph) - left_nodes
+
+        edge_colors = {}
+        for left_node in left_nodes:
+            available_colors = set(colors)
+            for neighbor in graph[left_node]:
+                if (left_node, neighbor) in edge_colors:
+                    available_colors.discard(edge_colors[(left_node, neighbor)])
+                elif (neighbor, left_node) in edge_colors:
+                    available_colors.discard(edge_colors[(neighbor, left_node)])
+            
+            for neighbor in graph[left_node]:
+                if (left_node, neighbor) not in edge_colors and (neighbor, left_node) not in edge_colors:
+                    edge_color = min(available_colors, key=lambda c: sum(graph.nodes[n]['weight'] for n in [left_node, neighbor]))
+                    edge_colors[(left_node, neighbor)] = edge_color
+                    available_colors.discard(edge_color)
+
+        end_time = time.time()
+        self.execution_time = end_time - start_time
+        print("Execution time: ", self.execution_time, " seconds")
+        return edge_colors
 
     def brelaz_coloring(self, graph: nx.Graph):
         start_time = time.time()
